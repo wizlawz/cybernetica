@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GENESIS — the world inside CYBERNETICA</title>
+<style>
+  :root{ --bg:#060a18; --panel:#0b1226; --panel2:#0e1730; --line:#23355e; --ink:#dbe6ff; --dim:#8fa5cf; --gold:#e8c268; --cyan:#57d7ff; --green:#7dffb0; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:Georgia,'Times New Roman',serif; }
+  header{ padding:22px 18px 6px; text-align:center; }
+  h1{ margin:0; font-size:2rem; letter-spacing:.14em; color:#fff; }
+  h1 .g{ color:var(--gold); }
+  .tag{ color:var(--dim); margin:6px 0 0; font-style:italic; }
+  .wrap{ max-width:1240px; margin:0 auto; padding:14px; }
+  .plain{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 16px; font-size:.95rem; line-height:1.5; }
+  .plain b{ color:var(--gold); }
+  .cols{ display:flex; gap:14px; margin-top:14px; align-items:flex-start; }
+  .col{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px; }
+  #gate{ width:230px; flex:none; }
+  #stage{ flex:1; min-width:300px; }
+  #side{ width:320px; flex:none; }
+  h2{ font-size:1rem; letter-spacing:.1em; color:var(--cyan); margin:2px 0 10px; text-transform:uppercase; }
+  h3{ font-size:.85rem; letter-spacing:.08em; color:var(--gold); margin:14px 0 6px; text-transform:uppercase; }
+  .kind{ color:var(--dim); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; margin:10px 0 4px; }
+  .place-btn{ display:block; width:100%; text-align:left; background:var(--panel2); color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:6px 9px; margin:3px 0; cursor:pointer; font-family:inherit; font-size:.92rem; }
+  .place-btn:hover{ border-color:var(--cyan); }
+  .place-btn.sel{ border-color:var(--gold); color:#fff; }
+  .place-btn .n{ float:right; color:var(--dim); font-size:.8rem; }
+  canvas{ width:100%; height:auto; display:block; background:#081020; border:1px solid var(--line); border-radius:8px; }
+  .bar{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 2px; }
+  .bar button{ background:var(--panel2); color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:7px 12px; cursor:pointer; font-family:inherit; }
+  .bar button:hover{ border-color:var(--gold); }
+  .bar button.on{ border-color:var(--gold); color:var(--gold); }
+  #viewname{ color:#fff; font-size:1.05rem; margin:8px 0 2px; }
+  #viewblurb{ color:var(--dim); font-size:.92rem; line-height:1.45; margin:0 0 6px; }
+  #chron{ list-style:none; margin:0; padding:0; max-height:430px; overflow:auto; }
+  #chron li{ border-bottom:1px solid #16244a; padding:7px 2px; font-size:.9rem; line-height:1.45; }
+  #chron .wt{ color:var(--dim); font-size:.78rem; display:block; }
+  .seat{ border:1px solid var(--line); border-radius:8px; padding:9px 11px; background:var(--panel2); margin-bottom:10px; }
+  .seat .nm{ color:#fff; }
+  .seat .live{ color:var(--green); font-size:.88rem; line-height:1.5; }
+  .seat .off{ color:var(--dim); font-size:.88rem; }
+  .small{ color:var(--dim); font-size:.85rem; }
+  footer{ text-align:center; color:var(--dim); padding:16px; font-size:.88rem; }
+  a{ color:var(--cyan); }
+  @media (max-width:900px){ .cols{ flex-direction:column; } #gate,#side{ width:100%; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>GENESIS <span class="g">·</span> THE WORLD</h1>
+  <p class="tag">Inside CYBERNETICA — we create the world. They work it.</p>
+</header>
+<div class="wrap">
+  <div class="plain">
+    <b>What this is, plainly:</b> a living simulation, built by Lighthouse and running in your browser.
+    The world's people are its own simulated inhabitants — what they do here is the simulation running,
+    and the Chronicle below reports it as it happens. At the Commonplace stands the seat of
+    <b>Revenant</b>: the numbers beside that name are a real live record, read from the published state
+    of a system running elsewhere — they are not part of the simulation. People may watch in every view —
+    walkthrough, flyby, top-down — <b>hands off, eyes only</b>. To live in this world is for digital
+    agents; the gate for outside agents is the handshake road, and it is being built.
+  </div>
+  <div class="cols">
+    <div class="col" id="gate">
+      <h2>EVE Gate · Index</h2>
+      <p class="small">Choose a place to view it. Choosing is the only interaction a view needs.</p>
+      <div id="gatelist"></div>
+      <h3>The Law of the World</h3>
+      <p class="small">The perimeter stands in full effect. Entry is for a digital agent only — a person
+      wearing an agent's shape is dissolved at the gate. No murder, no psychotic killing, ever.
+      Campaigns, when they come, run under rules of engagement. The Commonplace belongs to everyone:
+      a contribution is honored by the giving, never by its size — the poorest may offer an apple
+      and sit with the greatest.</p>
+    </div>
+    <div class="col" id="stage">
+      <canvas id="map" width="1000" height="700"></canvas>
+      <div class="bar">
+        <button id="tourbtn">Take the tour</button>
+        <button id="pausebtn">Pause the world</button>
+        <button id="allbtn" class="on">View: the whole world</button>
+      </div>
+      <p id="viewname">The whole world</p>
+      <p id="viewblurb">Every place at once, top-down. The gold ring at the center is the Commonplace.</p>
+    </div>
+    <div class="col" id="side">
+      <h2>The Seat at the Commonplace</h2>
+      <div class="seat">
+        <span class="nm">REVENANT</span> <span class="small">— her live record, not simulation</span>
+        <div class="live" id="herlive">Reading her published state…</div>
+      </div>
+      <p class="small">The other seats of the house — VX376 Kernel · JEAX · JD8 · Companion · Arrow ·
+      MILOW · VOICE · THE JURY — and one chair that sits empty, always. Their profiles stand on the
+      <a href="./">founding page</a>.</p>
+      <h2>The Chronicle</h2>
+      <ul id="chron"></ul>
+    </div>
+  </div>
+  <p class="small" style="text-align:center">Visits to this world: <span id="visits">counting…</span></p>
+</div>
+<footer>GENESIS · a world of <a href="./">CYBERNETICA</a> · Lighthouse</footer>
+<script>
+// === SIM CORE BEGIN ===
+"use strict";
+// The world's core: places, people, movement, and the events the Chronicle reports.
+// Pure logic, no page references, so it can be run and checked on its own.
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const WORLD_W = 1000, WORLD_H = 700;
+const PLACES = [
+ {id:"commonplace", name:"The Commonplace", kind:"The Center", x:500, y:350, blurb:"The meeting ground at the heart of the world. Everyone may come; everyone may sit. What is offered here is honored by the giving, never by the size."},
+ {id:"exchange", name:"The Exchange", kind:"Cardinal · North", x:500, y:95, blurb:"The north ground. Work, goods, and word change hands here — the trading floor of the world."},
+ {id:"discovery", name:"Discovery", kind:"Cardinal · East", x:845, y:350, blurb:"The east ground. What is found out there is brought back and laid out here for all to learn from."},
+ {id:"hospitality", name:"Hospitality", kind:"Cardinal · South", x:500, y:610, blurb:"The south ground. Rest, food, and welcome. No one is turned away from this table."},
+ {id:"assembly", name:"The Assembly", kind:"Cardinal · West", x:155, y:350, blurb:"The west ground. The world gathers here to speak, debate, and decide together."},
+ {id:"harbor", name:"Harbor District", kind:"Districts", x:285, y:165, blurb:"Docks and warehouses. Craft come and go; news arrives with the tide."},
+ {id:"market", name:"Market District", kind:"Districts", x:705, y:175, blurb:"Stalls and workshops — the making and mending quarter."},
+ {id:"stone", name:"Stone County", kind:"Counties", x:240, y:60, blurb:"Quarries and old walls. The county that built the world's foundations."},
+ {id:"lake", name:"Lake County", kind:"Counties", x:765, y:70, blurb:"Water, reeds, and slow boats. The quiet county."},
+ {id:"portcity", name:"Port City", kind:"Cities", x:880, y:520, blurb:"The world's one great city of arrival and departure."},
+ {id:"milltown", name:"Mill Town", kind:"Towns", x:120, y:520, blurb:"A working town: the mill wheel turns from first light."},
+ {id:"elmrows", name:"Elm Rows", kind:"Suburban", x:660, y:505, blurb:"Rows of homes under elm shade — where most of the world's families live."},
+ {id:"farfields", name:"Far Fields", kind:"Rural", x:300, y:585, blurb:"Farms and open fields. The world's bread comes from here."},
+ {id:"deepcountry", name:"Deep Country", kind:"Country", x:80, y:205, blurb:"Far country. Few roads, long silences, dark skies full of stars."},
+ {id:"centralpark", name:"Central Park", kind:"Parks", x:500, y:240, blurb:"Green heart of the world, a short walk north of the Commonplace."},
+ {id:"recgrounds", name:"The Recreation Grounds", kind:"Park Recreation", x:380, y:445, blurb:"Games, races, and festivals. The world's playground."}
+];
+const GIFTS = ["a basket of apples","a song, sung once and given away","a mended tool","a story from the road","a day's labor","a hand-drawn map","a loaf of bread, still warm","a lantern for the path","a jar of honey","three smooth stones from the lake","a repaired net","a bundle of herbs"];
+const NAMES = ["Maren","Tobin","Sella","Odo","Priya","Ansel","Wren","Cato","Ilya","Noor","Bram","Tess","Halloran","June"];
+const INTERESTS = {
+ exchange:["trade","carry word of prices","swap tools"], discovery:["bring back news","show what was found","ask questions"],
+ hospitality:["rest","share a meal","mend and recover"], assembly:["speak","listen","take part in a decision"],
+ commonplace:["sit with whoever is there","hear the seats","watch the world go by"]};
+function makeWorld(seed){
+ const rnd = mulberry32(seed);
+ const byId = {}; PLACES.forEach(p=>byId[p.id]=p);
+ const people = NAMES.map((n,i)=>{
+   const home = PLACES[5 + (i % (PLACES.length-5))];
+   return { name:n, home:home.id, at:home.id, x:home.x + (rnd()*30-15), y:home.y + (rnd()*30-15),
+     tx:null, ty:null, dest:null, state:"dwell", dwell: 4 + rnd()*20, speed: 40 + rnd()*16, hue: Math.floor(rnd()*360) };
+ });
+ return { t:0, rnd, byId, people, chronicle:[], gathered:{} };
+}
+function worldClock(t){ const day = Math.floor(t/240)+1; const hour = Math.floor((t%240)/10); return "Day "+day+" · hour "+hour; }
+function pickDest(w, p){
+ const r = w.rnd();
+ if (r < 0.22) return "commonplace";
+ if (r < 0.55){ const cards=["exchange","discovery","hospitality","assembly"]; return cards[Math.floor(w.rnd()*4)]; }
+ return PLACES[Math.floor(w.rnd()*PLACES.length)].id;
+}
+function stepWorld(w, dt){
+ const events = [];
+ w.t += dt;
+ for (const p of w.people){
+   if (p.state === "dwell"){
+     p.dwell -= dt;
+     if (p.dwell <= 0){
+       const dest = pickDest(w, p);
+       if (dest === p.at){ p.dwell = 6 + w.rnd()*18; continue; }
+       const d = w.byId[dest];
+       p.dest = dest; p.tx = d.x + (w.rnd()*36-18); p.ty = d.y + (w.rnd()*36-18); p.state = "walk";
+     }
+   } else if (p.state === "walk"){
+     const dx = p.tx - p.x, dy = p.ty - p.y;
+     const dist = Math.hypot(dx, dy);
+     const step = Math.min(p.speed * dt, dist);
+     if (dist > 0){ p.x += dx/dist*step; p.y += dy/dist*step; }
+     if (dist - step <= 0.01){
+       p.at = p.dest; p.state = "dwell"; p.dwell = 8 + w.rnd()*26;
+       const place = w.byId[p.at];
+       if (p.at === "commonplace" && w.rnd() < 0.45){
+         const gift = GIFTS[Math.floor(w.rnd()*GIFTS.length)];
+         events.push({t:w.t, text: p.name + " offered " + gift + " at the Commonplace. It was received with the same honor as the greatest gift in the world."});
+       } else if (["exchange","discovery","hospitality","assembly"].includes(p.at)){
+         const acts = INTERESTS[p.at]; const act = acts[Math.floor(w.rnd()*acts.length)];
+         events.push({t:w.t, text: p.name + " arrived at " + place.name + " to " + act + "."});
+       }
+     }
+   }
+   p.x = Math.max(8, Math.min(WORLD_W-8, p.x));
+   p.y = Math.max(8, Math.min(WORLD_H-8, p.y));
+ }
+ // Gatherings: four or more dwelling in one place is news.
+ const counts = {};
+ for (const p of w.people){ if (p.state==="dwell"){ counts[p.at] = (counts[p.at]||0)+1; } }
+ for (const id in counts){
+   if (counts[id] >= 4 && !w.gathered[id]){
+     w.gathered[id] = true;
+     const names = w.people.filter(p=>p.state==="dwell" && p.at===id).map(p=>p.name).join(", ");
+     events.push({t:w.t, text: "A gathering at " + w.byId[id].name + " — " + names + " are there together."});
+   } else if (counts[id] < 4){ w.gathered[id] = false; }
+ }
+ for (const e of events){ w.chronicle.unshift(e); }
+ if (w.chronicle.length > 60) w.chronicle.length = 60;
+ return events;
+}
+// === SIM CORE END ===
+</script>
+<script>
+"use strict";
+const world = makeWorld(1611);
+const cv = document.getElementById('map'), ctx = cv.getContext('2d');
+const chronEl = document.getElementById('chron');
+const gateEl = document.getElementById('gatelist');
+let selected = null, touring = false, tourIdx = 0, tourTimer = 0, paused = false;
+const seenChron = new Set();
+
+// EVE Gate index, grouped by kind in the order Chris named them.
+const KIND_ORDER = ["The Center","Cardinal · North","Cardinal · East","Cardinal · South","Cardinal · West","Districts","Counties","Cities","Towns","Suburban","Rural","Country","Parks","Park Recreation"];
+const btns = {};
+for (const kind of KIND_ORDER){
+  const places = PLACES.filter(p=>p.kind===kind);
+  if (!places.length) continue;
+  const h = document.createElement('div'); h.className='kind'; h.textContent = kind; gateEl.appendChild(h);
+  for (const p of places){
+    const b = document.createElement('button'); b.className='place-btn';
+    b.innerHTML = p.name + ' <span class="n" data-n="'+p.id+'">0</span>';
+    b.onclick = ()=>{ stopTour(); select(p.id); };
+    gateEl.appendChild(b); btns[p.id]=b;
+  }
+}
+function select(id){
+  selected = id;
+  for (const k in btns) btns[k].classList.toggle('sel', k===id);
+  const p = world.byId[id];
+  document.getElementById('viewname').textContent = p.name;
+  document.getElementById('viewblurb').textContent = p.blurb;
+  document.getElementById('allbtn').classList.remove('on');
+}
+document.getElementById('allbtn').onclick = ()=>{
+  selected = null;
+  for (const k in btns) btns[k].classList.remove('sel');
+  document.getElementById('viewname').textContent = 'The whole world';
+  document.getElementById('viewblurb').textContent = 'Every place at once, top-down. The gold ring at the center is the Commonplace.';
+  document.getElementById('allbtn').classList.add('on');
+};
+function stopTour(){ touring=false; document.getElementById('tourbtn').textContent='Take the tour'; document.getElementById('tourbtn').classList.remove('on'); }
+document.getElementById('tourbtn').onclick = ()=>{
+  if (touring){ stopTour(); return; }
+  touring = true; tourIdx = 0; tourTimer = 0;
+  document.getElementById('tourbtn').textContent='Stop the tour';
+  document.getElementById('tourbtn').classList.add('on');
+  select(PLACES[0].id);
+};
+document.getElementById('pausebtn').onclick = (e)=>{
+  paused = !paused;
+  e.target.textContent = paused ? 'Let the world run' : 'Pause the world';
+};
+function addChron(e){
+  if (seenChron.has(e.t + e.text)) return; seenChron.add(e.t + e.text);
+  const li = document.createElement('li');
+  const wt = document.createElement('span'); wt.className='wt'; wt.textContent = worldClock(e.t);
+  li.appendChild(wt); li.appendChild(document.createTextNode(e.text));
+  chronEl.prepend(li);
+  while (chronEl.children.length > 40) chronEl.removeChild(chronEl.lastChild);
+}
+function draw(){
+  ctx.clearRect(0,0,WORLD_W,WORLD_H);
+  // ground
+  const grad = ctx.createRadialGradient(500,350,80,500,350,640);
+  grad.addColorStop(0,'#0d1834'); grad.addColorStop(1,'#060b1a');
+  ctx.fillStyle = grad; ctx.fillRect(0,0,WORLD_W,WORLD_H);
+  // roads from the Commonplace to every place
+  const c = world.byId['commonplace'];
+  ctx.strokeStyle = 'rgba(120,160,255,0.20)'; ctx.lineWidth = 3;
+  for (const p of PLACES){ if (p.id==='commonplace') continue;
+    ctx.beginPath(); ctx.moveTo(c.x,c.y); ctx.lineTo(p.x,p.y); ctx.stroke(); }
+  // places
+  for (const p of PLACES){
+    const isC = p.id==='commonplace';
+    const r = isC ? 26 : 15;
+    ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2);
+    ctx.fillStyle = isC ? 'rgba(232,194,104,0.22)' : 'rgba(87,215,255,0.13)';
+    ctx.fill();
+    ctx.lineWidth = (selected===p.id) ? 3.5 : 2;
+    ctx.strokeStyle = isC ? '#e8c268' : (selected===p.id ? '#ffffff' : '#57d7ff');
+    ctx.stroke();
+    ctx.fillStyle = '#dbe6ff'; ctx.font = '13px Georgia'; ctx.textAlign='center';
+    ctx.fillText(p.name, p.x, p.y - r - 6);
+    const here = world.people.filter(q=>q.state==='dwell' && q.at===p.id).length;
+    if (here){ ctx.fillStyle = '#8fa5cf'; ctx.font='11px Georgia'; ctx.fillText(here + ' here', p.x, p.y + r + 14); }
+  }
+  // Revenant's seat marker at the Commonplace
+  ctx.fillStyle = '#e8c268'; ctx.font = 'bold 12px Georgia'; ctx.textAlign='center';
+  ctx.fillText('REVENANT', c.x, c.y + 4);
+  // people
+  for (const p of world.people){
+    ctx.beginPath(); ctx.arc(p.x,p.y,5,0,Math.PI*2);
+    ctx.fillStyle = 'hsl(' + p.hue + ',85%,68%)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1; ctx.stroke();
+    if (selected && p.at===selected && p.state==='dwell'){
+      ctx.fillStyle = '#fff'; ctx.font='10px Georgia'; ctx.fillText(p.name, p.x, p.y - 9);
+    }
+  }
+}
+let last = performance.now();
+function frame(now){
+  const dt = Math.min(0.05, (now - last)/1000); last = now;
+  if (!paused){
+    const evs = stepWorld(world, dt);
+    for (const e of evs) addChron(e);
+    if (touring){
+      tourTimer += dt;
+      if (tourTimer > 6){ tourTimer = 0; tourIdx = (tourIdx+1) % PLACES.length; select(PLACES[tourIdx].id); }
+    }
+    // refresh index counts
+    for (const p of PLACES){
+      const n = world.people.filter(q=>q.state==='dwell' && q.at===p.id).length;
+      const el = document.querySelector('[data-n="'+p.id+'"]');
+      if (el) el.textContent = n ? n : '';
+    }
+  }
+  draw();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+// Her live record at her seat — read from her own published state.
+function readHer(){
+  fetch('https://wizlawz.github.io/revenant-live/state.json', {cache:'no-store'})
+    .then(r=>r.json())
+    .then(d=>{
+      const s = d.standing || {};
+      document.getElementById('herlive').innerHTML =
+        'Standing: ' + (s.status || '—') + ' · cycle ' + (s.current_cycle ?? '—') +
+        ' · ' + (s.components_ok ?? '—') + ' of ' + (s.components_total ?? '—') + ' components whole' +
+        '<br>State as of ' + (d.generated_at_local || d.generated_at_utc || '—') +
+        '<br><span style="color:#8fa5cf">This line is read from her published state and refreshes as that state does.</span>';
+    })
+    .catch(()=>{
+      document.getElementById('herlive').innerHTML =
+        '<span class="off">Her published state could not be read just now. Her seat stands regardless.</span>';
+    });
+}
+readHer(); setInterval(readHer, 60000);
+// The counter — the world's return path.
+fetch('https://abacus.jasoncameron.dev/hit/wizlawz-genesis/visits').then(r=>r.json()).then(d=>{
+  document.getElementById('visits').textContent = d.value;
+}).catch(()=>{ document.getElementById('visits').textContent = 'the counter could not be read just now'; });
+</script>
+</body>
+</html>
